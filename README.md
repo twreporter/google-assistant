@@ -9,7 +9,9 @@ Twreporter Google Assistant App
 
 
 -- agent.zip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定  
--- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment  
+-- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment    
+   目前儲存RSS所需資訊之後台是Firebase，視需求需要更改這部份的設計~
+   
 
 <img src="./reporter_screenshot.png" />  
   
