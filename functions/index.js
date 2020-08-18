@@ -33,7 +33,7 @@ var i=0;
 var j=0;
 var flag=false;
 
-var suggest_array=["香港","國安法","報導者","新聞","調查報導","立場新聞","何桂藍","反送中","笑氣","調查報導","新聞","報導者","陳潔","楊智強","青少年","暑假","毒品","調查報導","新聞","報導者","李雪莉","楊智強","運毒","死囚"];
+var suggest_array=["香港","國安法","報導者","新聞","調查報導", "立場新聞","何桂藍","反送中","笑氣","陳潔","楊智強","青少年","暑假","毒品","李雪莉","運毒","死囚"];
 
 const SelectContexts = {
 	parameter: 'option',
@@ -161,7 +161,8 @@ function fetch() {
 					if(flag===true){
 						option_output[i]={
 							"title": final_data[i].title,
-							"description": ""
+							"description": "",
+							"synonyms":final_data[i].keywords,
 						}
 					if(!conv.screen){conv.expectUserResponse = false;break;}
 
@@ -271,16 +272,46 @@ function fetch() {
 	});
 
 app.intent('媒體狀態', (conv) => {
-	  const mediaStatus = conv.arguments.get('MEDIA_STATUS');
-	  let response = '糟糕，我不清楚你的播放狀態';
-	  if (mediaStatus && mediaStatus.status === 'FINISHED') {
-		response = '希望你享受這段Podcast!';
-	  }
-	conv.ask(response);
-	conv.ask('接下來，想要聽甚麼內容呢?');
-	conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
-	conv.ask(new Suggestions('👋 掰掰' ));
-  
+		   return new Promise(
+			   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val())});
+			}).then(function (final_data) {
+
+		  const mediaStatus = conv.arguments.get('MEDIA_STATUS');
+		  let response = '糟糕，我不清楚你的播放狀態';
+		  if (mediaStatus && mediaStatus.status === 'FINISHED') {
+			response = '希望你享受這段Podcast!';
+		  }
+		  
+		option_output={};
+	  
+		for(i=0;i<Object.keys(final_data).length-1;i++)
+			{	
+				option_output[i]={
+						"title": final_data[i].title,
+						"description": ""
+						}	
+				
+				if(Object.keys(option_output).length===5){break;}
+
+			}  
+		  
+			conv.ask(response);
+			conv.ask('接下來，想要聽甚麼內容呢?');
+			conv.ask(new List({
+				title: '這是最新的五則集數',
+				items: option_output,
+				}));			
+			conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
+			conv.ask(new Suggestions('👋 掰掰' ));
+			
+		}).catch(function (error) {
+			
+		console.log(error)
+		
+		conv.close(new SimpleResponse({               
+			speech: `<speak><p><s>發生一點小狀況</s></p></speak>`,
+			text: "發生一點小狀況"}));
+	});
 });
 
 	
