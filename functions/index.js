@@ -24,7 +24,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://hank199599.firebaseio.com"
 });
-
 const database = admin.database();
 let Parser = require('rss-parser');
 let parser = new Parser();
@@ -106,7 +105,7 @@ function fetch() {
 		conv.ask(new BasicCard({ 
 				title:"歡迎使用",
 				subtitle:"請詢問我任意議題",
-				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看!"
+				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看"
 		}));
 		
 		conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
@@ -164,7 +163,7 @@ function fetch() {
 		if(Object.keys(option_output).length>=2){
 			conv.contexts.set(SelectContexts.parameter, 1);
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽看看</s></p></speak>`,
+						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽吧</s></p></speak>`,
 						text:"下面是我找到的對應集數"
 					}));
 			conv.ask(new List({
@@ -189,6 +188,8 @@ function fetch() {
 					   alt: 'Album cover of an ocean view',
 				}),
 			 }));
+			conv.ask(new Suggestions('暫停','下一首'));
+	 
 		}
 		else{
 		conv.ask(new SimpleResponse({
@@ -231,6 +232,8 @@ function fetch() {
 				   alt: 'Album cover of an ocean view',
 				}),
 			 }));
+			
+			conv.ask(new Suggestions('暫停','下一首'));
 			conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
 			conv.ask(new Suggestions('👋 掰掰' ));
 					
