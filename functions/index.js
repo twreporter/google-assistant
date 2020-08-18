@@ -92,6 +92,7 @@ function fetch() {
 }
 
 	app.intent('預設歡迎語句', (conv) => {
+		
 	   return new Promise(
 		   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val().keys)});
 		}).then(function (final_data) {
@@ -102,6 +103,8 @@ function fetch() {
 					speech: `<speak><p><s>歡迎，我提供報導者與SoundOn共同製播的Podcast收聽服務</s><s>詢問我任何的議題，我會抓取內容相符的集數</s></p></speak>`,
 					text:"歡迎，請選擇要收聽的Podcast。"
 				}));
+				
+		if(conv.screen){		
 		conv.ask(new BasicCard({ 
 				title:"歡迎使用",
 				subtitle:"請詢問我任意議題",
@@ -110,7 +113,14 @@ function fetch() {
 		
 		conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
 		conv.ask(new Suggestions('👋 掰掰' ));
-	
+		}
+		else{
+			
+		conv.ask(`<speak><p><s>例如，你可以搜尋</s><s>${suggest_array[parseInt(Math.random() * (suggest_array.length))]}</s></p></speak>`);
+		conv.noInputs = ["抱歉，我沒聽輕楚。請試著問我"+suggest_array[parseInt(Math.random() * (suggest_array.length))], "請試著問我要查詢的關鍵字，例如、" + suggest_array[parseInt(Math.random() * (suggest_array.length))], "很抱歉，我幫不上忙"];
+
+		}
+		
 		fetch()
 		
 		}).catch(function (error) {
@@ -153,6 +163,10 @@ function fetch() {
 							"title": final_data[i].title,
 							"description": ""
 						}
+					if(!conv.screen){conv.expectUserResponse = false;break;}
+
+					if(Object.keys(option_output).length===5){break;}
+				
 				}
 			}
 		}
@@ -163,7 +177,7 @@ function fetch() {
 		if(Object.keys(option_output).length>=2){
 			conv.contexts.set(SelectContexts.parameter, 1);
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽吧</s></p></speak>`,
+						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽吧!</s></p></speak>`,
 						text:"下面是我找到的對應集數"
 					}));
 			conv.ask(new List({
@@ -174,11 +188,14 @@ function fetch() {
 		else if (Object.keys(option_output).length===1){
 			var num=Object.keys(option_output)
 			
+			if(conv.screen){
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>我只有找到一個對應的集數，標題是${final_data[num].title}</s><s>我們來聽看看吧</s></p></speak>`,
-						text:"只找到一個對應的集數，開始收聽吧"
-					}));
-					
+						speech: `<speak><p><s>我只有找到一個對應的集數，標題是${final_data[num].title}</s><break time="0.5s"/></p></speak>`,
+						text:"只找到一個對應的集數，開始收聽吧"}));
+			}
+			else{
+			conv.ask(`<speak><p><s>接下來是我找到的最新集數，標題是${final_data[num].title}</s><break time="0.5s"/></p></speak>`);
+			}
 			 conv.ask(new MediaObject({
 				name: final_data[num].title,
 				url: final_data[num].url.replace('?aid=rss_feed',''),
@@ -196,6 +213,11 @@ function fetch() {
 					speech: `<speak><p><s>不好意思</s><s>我找不到有提到該內容的集數</s></p></speak>`,
 					text:"抱歉，我找不到類似的集數"
 				}));
+		conv.ask(new BasicCard({ 
+				title:"404 NOT FOUND",
+				subtitle:"找不到提及「"+any+"」的內容",
+				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看"
+			}));
 		}
 		
 	conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
