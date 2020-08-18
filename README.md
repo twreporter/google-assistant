@@ -8,7 +8,7 @@ Twreporter Google Assistant App
 支援使用者以輸入內容搜尋議題相近的集數播放  
 
 
--- agent.sip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定  
+-- agent.zip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定  
 -- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment  
 
 
