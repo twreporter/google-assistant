@@ -12,6 +12,17 @@ Twreporter Google Assistant App
 -- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment  
 
 
+#內容架構更改
+轉變運作模式轉為:
+
+串接由報導者推出的Podcast之RSS，
+支援使用者以輸入內容搜尋議題相近的集數播放
+
+
+-- agent.sip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定
+-- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment
+
+
 執行原理
 -------
 [<img src="https://developers.google.com/assistant/conversational/images/aog-user-query-to-fulfillment.png" />](https://developers.google.com/assistant/conversational/overview)
