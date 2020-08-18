@@ -12,6 +12,9 @@ Twreporter Google Assistant App
 -- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment  
 
 
+[<img src="./reporter_screenshot.png" />]
+
+
 執行原理
 -------
 [<img src="https://developers.google.com/assistant/conversational/images/aog-user-query-to-fulfillment.png" />](https://developers.google.com/assistant/conversational/overview)
