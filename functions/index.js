@@ -217,7 +217,7 @@ function fetch() {
 			
 			if(conv.screen){
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>我只有找到一個對應的集數，標題是<break time="0.5s"/>${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`,
+						speech: `<speak><p><s>接下來，是我找到的唯一集數，標題是<break time="0.5s"/>${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`,
 						text:"只找到一個對應的集數，開始收聽吧"}));
 			}
 			else{
@@ -225,9 +225,9 @@ function fetch() {
 			conv.ask(`<speak><p><s>接下來是我找到的最新集數，標題是${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`);
 			}
 			 conv.ask(new MediaObject({
-				name: final_data[num].tags,
+				name: final_data[num].title,
 				url: final_data[num].url.replace('?aid=rss_feed',''),
-				description: final_data[num].title,
+				description: final_data[num].tags,
 				image: new Image({
 					   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 					   alt: 'Album cover of an ocean view',
@@ -317,7 +317,7 @@ app.intent('媒體狀態', (conv) => {
 	  
 		for(i=0;i<Object.keys(final_data).length-2;i++)
 			{	
-				key_array=final_data[i].keywords;
+				key_array=[];
 				key_array.push(numbers[i])
 		
 				option_output[i]={
