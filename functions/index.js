@@ -368,7 +368,7 @@ app.intent('最新一集', (conv) => {
 			 conv.ask(new MediaObject({
 				name: final_data.title,
 				url: final_data.url.replace('?aid=rss_feed',''),
-				description: final_data.tags,
+				description: "發布於"+final_data.pubDate,
 				image: new Image({
 				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 				   alt: 'Album cover of an ocean view',
