@@ -8,7 +8,8 @@ Twreporter Google Assistant App
 支援使用者以輸入內容搜尋議題相近的集數播放  
 
 
--- agent.zip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定  
+-- agent.zip :上傳至Dialogflow可直接複寫原始架構，轉為新的設定    
+   Dialogfow專案 > Export and Import > IMPORT FROM ZIP  
 -- function資料夾 :  依據RSS架構重新編寫設計的Fulfillment    
    目前儲存RSS所需資訊之後台是Firebase，視需求需要更改這部份的設計~
 
