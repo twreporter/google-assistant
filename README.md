@@ -13,7 +13,7 @@ Twreporter Google Assistant App
    目前儲存RSS所需資訊之後台是Firebase，視需求需要更改這部份的設計~
 
 
-增加針對智慧喇叭的對話流程   
+增加針對智慧音箱(Google Home)的對話流程   
 
 <img src="./reporter_screenshot.png" />  
   
