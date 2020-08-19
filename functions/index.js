@@ -40,6 +40,19 @@ const SelectContexts = {
 }
 
 
+function selectDay(datestring) {
+	var weekdays = ["日","一","二","三","四","五","六"];
+	
+    var today = new Date(datestring);
+    var nowTime = today.getTime()+8*3600*1000;
+	var oYear=today.getFullYear().toString();
+    var oMoth = (today.getMonth() + 1).toString();
+    var oDay = today.getDate().toString();
+	var oWeek=weekdays[today.getDay()];	
+    return oYear+'年'+oMoth+'月'+oDay+'日  ('+oWeek+')';
+}
+
+
 function fetch() {
 	
 	return new Promise(
@@ -67,6 +80,7 @@ function fetch() {
 						description:item.itunes.summary,
 						url:item.enclosure.url,
 						keywords:temp,
+						pubDate:selectDay(item.pubDate)
 					}
 				}
 				array=array.split(',');
@@ -97,7 +111,7 @@ function fetch() {
 		   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val().keys)});
 		}).then(function (final_data) {
 		
-		var suggest_array=final_data;
+		suggest_array=final_data;
 		
 		conv.ask(new SimpleResponse({
 					speech: `<speak><p><s>歡迎，我提供報導者與SoundOn共同製播的Podcast收聽服務</s><s>詢問我任何的議題，我會抓取內容相符的集數</s></p></speak>`,
@@ -106,11 +120,13 @@ function fetch() {
 				
 		if(conv.screen){		
 		conv.ask(new BasicCard({ 
-				title:"歡迎使用",
-				subtitle:"請詢問我任意議題",
-				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看"
-		}));
+				title:"【SoundOn 原創】",
+				subtitle:"由台灣獨立媒體《報導者》所製播。以調查報導為主的記者們，把走進的現場、發現的故事、採訪的幕後、遇見的人物，透過訪談、對話、第一人稱敘事帶給你。希望以聲音的形式，陪伴你關心世界、走入在地、聽見多元社會脈動。\n節目包括三個單元：＃去現場 、＃記者給你當、＃你為什麼要，歡迎緊追《報導者》臉書粉絲團、Instagram、電子報，許願節目來賓、參與提問，告訴我們你想聽什麼。",
+				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看",
+				buttons: new Button({ title: '贊助力挺', url: "https://support.twreporter.org/?utm_source=podcast&utm_medium=podcast&utm_campaign=intro", display: 'CROPPED', }),
+	}));
 		
+		conv.ask(new Suggestions('播放最新的集數' ));
 		conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
 		conv.ask(new Suggestions('👋 掰掰' ));
 		}
@@ -142,6 +158,7 @@ function fetch() {
 			
 		console.log(final_data)	
 		option_output={};
+		suggest_array=final_data.keys;
 		
 		for(i=0;i<Object.keys(final_data).length-1;i++)
 		{	
@@ -161,7 +178,7 @@ function fetch() {
 					if(flag===true){
 						option_output[i]={
 							"title": final_data[i].title,
-							"description": "",
+							"description": final_data[i].pubDate,
 							"synonyms":final_data[i].keywords,
 						}
 					if(!conv.screen){conv.expectUserResponse = false;break;}
@@ -184,7 +201,9 @@ function fetch() {
 			conv.ask(new List({
 				title: '請查看下列內容',
 				items: option_output,
-				}));		
+				}));	
+			conv.ask(new Suggestions('播放最新的集數' ));
+				
 		}
 		else if (Object.keys(option_output).length===1){
 			var num=Object.keys(option_output)
@@ -207,7 +226,8 @@ function fetch() {
 				}),
 			 }));
 			conv.ask(new Suggestions('暫停','下一首'));
-	 
+			
+			if(num!==0){conv.ask(new Suggestions('播放最新的集數' ));}
 		}
 		else{
 		conv.ask(new SimpleResponse({
@@ -219,10 +239,10 @@ function fetch() {
 				subtitle:"找不到提及「"+any+"」的內容",
 				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看"
 			}));
+		conv.ask(new Suggestions('播放最新的集數' ));
 		}
 		
 	conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
-
 	conv.ask(new Suggestions('👋 掰掰' ));
 
 	}).catch(function (error) {
@@ -237,10 +257,12 @@ function fetch() {
 	
 	app.intent('選擇集數', (conv, input, option) => {
 	   return new Promise(
-		   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val()[option])});
+		   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val())});
 			}).then(function (final_data) {
 
 			console.log(final_data)
+			suggest_array=final_data.keys;
+			final_data=final_data[option];
 			
 			conv.ask(new SimpleResponse({
 						speech: `<speak><p><s>好的</s><s>準備收聽${final_data.title}</s></p></speak>`,
@@ -257,6 +279,7 @@ function fetch() {
 			 }));
 			
 			conv.ask(new Suggestions('暫停','下一首'));
+			if(option!==0){conv.ask(new Suggestions('播放最新的集數' ));}
 			conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
 			conv.ask(new Suggestions('👋 掰掰' ));
 					
@@ -300,7 +323,9 @@ app.intent('媒體狀態', (conv) => {
 			conv.ask(new List({
 				title: '這是最新的五則集數',
 				items: option_output,
-				}));			
+				}));	
+				
+			conv.ask(new Suggestions('播放最新的集數' ));
 			conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
 			conv.ask(new Suggestions('👋 掰掰' ));
 			
@@ -314,7 +339,45 @@ app.intent('媒體狀態', (conv) => {
 	});
 });
 
+app.intent('最新一集', (conv) => {
+		   return new Promise(
+			   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val())});
+			}).then(function (final_data) {
+
+			console.log(final_data)
+			suggest_array=final_data.keys;
+			final_data=final_data[0];
+			
+			conv.ask(new SimpleResponse({
+						speech: `<speak><p><s>沒問題，這是目前最新的集數</s><s>準備收聽${final_data.title}</s></p></speak>`,
+						text:"好的，這是我找到的最新集數"
+					}));
+			 conv.ask(new MediaObject({
+				name: final_data.title,
+				url: final_data.url.replace('?aid=rss_feed',''),
+				description: final_data.description,
+				image: new Image({
+				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
+				   alt: 'Album cover of an ocean view',
+				}),
+			 }));
+			 
+			if(!conv.screen){conv.expectUserResponse = false;} //如果裝置沒有螢幕，則直接關閉Action但繼續撥放 
 	
+			conv.ask(new Suggestions('暫停','下一首'));
+			conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
+			conv.ask(new Suggestions('👋 掰掰' ));
+					
+			}).catch(function (error) {
+			
+		console.log(error)
+		
+		conv.close(new SimpleResponse({               
+			speech: `<speak><p><s>發生一點小狀況</s></p></speak>`,
+			text: "發生一點小狀況"}));
+	});
+});
+
 app.intent('結束對話', (conv) => {
 	
 		conv.ask('感謝你的使用，下次見');
