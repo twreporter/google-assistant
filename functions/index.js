@@ -272,7 +272,7 @@ function fetch() {
 			suggest_array=final_data.keys;
 			
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>好的</s><s>準備收聽<break time="0.5s"/>${final_data.title.replace(/[＃]+\W+[ ]/gm,"")}</s></p></speak>`,
+						speech: `<speak><p><s>好的</s><s>準備收聽<break time="0.5s"/>${final_data[option].title.replace(/[＃]+\W+[ ]/gm,"")}</s></p></speak>`,
 						text:"好的，開始收聽吧"
 					}));
 			 conv.ask(new MediaObject({
