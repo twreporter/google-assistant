@@ -206,7 +206,7 @@ function fetch() {
 						text:"下面是我找到的對應集數"
 					}));
 			conv.ask(new List({
-				title: '提及「'+any+'」的集數',
+				title: '關鍵字包含「'+any+'」的集數',
 				items: option_output,
 				}));	
 			conv.ask(new Suggestions('播放最新的集數' ));
@@ -227,7 +227,7 @@ function fetch() {
 			 conv.ask(new MediaObject({
 				name: final_data[num].title,
 				url: final_data[num].url.replace('?aid=rss_feed',''),
-				description: final_data[num].tags,
+				description: "發布於"+final_data[num].pubDate,
 				image: new Image({
 					   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 					   alt: 'Album cover of an ocean view',
@@ -279,7 +279,7 @@ function fetch() {
 			 conv.ask(new MediaObject({
 				name: final_data.title,
 				url: final_data.url.replace('?aid=rss_feed',''),
-				description: final_data.tags,
+				description: "發布於"+final_data[num].pubDate,
 				image: new Image({
 				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 				   alt: 'Album cover of an ocean view',
