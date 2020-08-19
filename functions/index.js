@@ -19,6 +19,7 @@ const functions = require('firebase-functions');
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./config/hank199599-firebase-adminsdk-fc9jb-a23a39b67c.json");
+var numbers=require("./numbers.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -32,13 +33,10 @@ var option_output={};
 var i=0;
 var j=0;
 var flag=false;
-
+var key_array=[];
 var suggest_array=["香港","國安法","報導者","新聞","調查報導", "立場新聞","何桂藍","反送中","笑氣","陳潔","楊智強","青少年","暑假","毒品","李雪莉","運毒","死囚"];
 
-const SelectContexts = {
-	parameter: 'option',
-}
-
+const SelectContexts = {parameter: 'option',}
 
 function selectDay(datestring) {
 	var weekdays = ["日","一","二","三","四","五","六"];
@@ -62,6 +60,7 @@ function fetch() {
 
 			  var output={};
 			  var array="";
+			  var tags=[];
 			  
 				if(!err){
 	
@@ -77,16 +76,19 @@ function fetch() {
 
 					output[i]={
 						title:item.title,
-						description:item.itunes.summary,
 						url:item.enclosure.url,
 						keywords:temp,
-						pubDate:selectDay(item.pubDate)
+						pubDate:selectDay(item.pubDate),
+						tags:item.itunes.summary.split(' ')[0]
 					}
+					
+					if(item.itunes.summary.split(' ')[0].indexOf('＃')!==-1){tags.push(item.itunes.summary.split(' ')[0])}
 				}
 				array=array.split(',');
 				array=Array.from(new Set(array));
+				tags=Array.from(new Set(tags));
 				
-				resolve([output,array])
+				resolve([output,array,tags])
 			  }
 				else{reject(err)}
 		})
@@ -96,6 +98,7 @@ function fetch() {
 		console.log(final_data)
 		database.ref('/reporter_podcast').update(final_data[0]);
 		database.ref('/reporter_podcast').update({keys:final_data[1]});
+		database.ref('/reporter_podcast').update({tags:final_data[2]});
 
 	}).catch(function (error) {
 		
@@ -115,16 +118,16 @@ function fetch() {
 		
 		conv.ask(new SimpleResponse({
 					speech: `<speak><p><s>歡迎，我提供報導者與SoundOn共同製播的Podcast收聽服務</s><s>詢問我任何的議題，我會抓取內容相符的集數</s></p></speak>`,
-					text:"歡迎，請選擇要收聽的Podcast。"
+					text:"詢問我任何的議題，我會抓取內容相符的集數供你選擇!"
 				}));
 				
 		if(conv.screen){		
 		conv.ask(new BasicCard({ 
 				title:"【SoundOn 原創】",
-				subtitle:"由台灣獨立媒體《報導者》所製播。以調查報導為主的記者們，把走進的現場、發現的故事、採訪的幕後、遇見的人物，透過訪談、對話、第一人稱敘事帶給你。希望以聲音的形式，陪伴你關心世界、走入在地、聽見多元社會脈動。\n節目包括三個單元：＃去現場 、＃記者給你當、＃你為什麼要，歡迎緊追《報導者》臉書粉絲團、Instagram、電子報，許願節目來賓、參與提問，告訴我們你想聽什麼。",
-				text:"我會為你尋找議題相似的Podcast供你聆聽，\n或是點選建議卡片來嘗試看看",
+				subtitle:"由台灣獨立媒體《報導者》所製播。以調查報導為主的記者們，把走進的現場、發現的故事、採訪的幕後、遇見的人物，透過訪談、對話、第一人稱敘事帶給你。希望以聲音的形式，陪伴你關心世界、走入在地、聽見多元社會脈動。\n節目包括三個單元：\n＃去現場\n＃記者給你當\n＃你為什麼要",
+				text:"歡迎緊追《報導者》臉書粉絲團、Instagram、電子報，許願節目來賓、參與提問，告訴我們你想聽什麼。",
 				buttons: new Button({ title: '贊助力挺', url: "https://support.twreporter.org/?utm_source=podcast&utm_medium=podcast&utm_campaign=intro", display: 'CROPPED', }),
-	}));
+		}));
 		
 		conv.ask(new Suggestions('播放最新的集數' ));
 		conv.ask(new Suggestions(suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))], suggest_array[parseInt(Math.random() * (suggest_array.length))]));
@@ -160,7 +163,7 @@ function fetch() {
 		option_output={};
 		suggest_array=final_data.keys;
 		
-		for(i=0;i<Object.keys(final_data).length-1;i++)
+		for(i=0;i<Object.keys(final_data).length-2;i++)
 		{	
 			flag=false;
 			var temp=final_data[i].keywords;
@@ -176,10 +179,14 @@ function fetch() {
 						}
 						
 					if(flag===true){
+						
+						key_array=final_data[i].keywords;
+						key_array.push(numbers[i])
+						
 						option_output[i]={
 							"title": final_data[i].title,
 							"description": final_data[i].pubDate,
-							"synonyms":final_data[i].keywords,
+							"synonyms":key_array,
 						}
 					if(!conv.screen){conv.expectUserResponse = false;break;}
 
@@ -199,7 +206,7 @@ function fetch() {
 						text:"下面是我找到的對應集數"
 					}));
 			conv.ask(new List({
-				title: '請查看下列內容',
+				title: '提及「'+any+'」的集數',
 				items: option_output,
 				}));	
 			conv.ask(new Suggestions('播放最新的集數' ));
@@ -210,23 +217,24 @@ function fetch() {
 			
 			if(conv.screen){
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>我只有找到一個對應的集數，標題是${final_data[num].title}</s><break time="0.5s"/></p></speak>`,
+						speech: `<speak><p><s>我只有找到一個對應的集數，標題是<break time="0.5s"/>${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`,
 						text:"只找到一個對應的集數，開始收聽吧"}));
 			}
 			else{
-			conv.ask(`<speak><p><s>接下來是我找到的最新集數，標題是${final_data[num].title}</s><break time="0.5s"/></p></speak>`);
+			conv.expectUserResponse = false;	
+			conv.ask(`<speak><p><s>接下來是我找到的最新集數，標題是${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`);
 			}
 			 conv.ask(new MediaObject({
-				name: final_data[num].title,
+				name: final_data[num].tags,
 				url: final_data[num].url.replace('?aid=rss_feed',''),
-				description: final_data[num].description,
+				description: final_data[num].title,
 				image: new Image({
 					   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 					   alt: 'Album cover of an ocean view',
 				}),
 			 }));
 			conv.ask(new Suggestions('暫停','下一首'));
-			
+
 			if(num!==0){conv.ask(new Suggestions('播放最新的集數' ));}
 		}
 		else{
@@ -265,13 +273,13 @@ function fetch() {
 			final_data=final_data[option];
 			
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>好的</s><s>準備收聽${final_data.title}</s></p></speak>`,
+						speech: `<speak><p><s>好的</s><s>準備收聽<break time="0.5s"/>${final_data.title.replace(/[＃]+\W+[ ]/gm,"")}</s></p></speak>`,
 						text:"好的，開始收聽吧"
 					}));
 			 conv.ask(new MediaObject({
 				name: final_data.title,
 				url: final_data.url.replace('?aid=rss_feed',''),
-				description: final_data.description,
+				description: final_data.tags,
 				image: new Image({
 				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 				   alt: 'Album cover of an ocean view',
@@ -307,17 +315,22 @@ app.intent('媒體狀態', (conv) => {
 		  
 		option_output={};
 	  
-		for(i=0;i<Object.keys(final_data).length-1;i++)
+		for(i=0;i<Object.keys(final_data).length-2;i++)
 			{	
+				key_array=final_data[i].keywords;
+				key_array.push(numbers[i])
+		
 				option_output[i]={
 						"title": final_data[i].title,
-						"description": ""
-						}	
+						"description": final_data[i].pubDate,
+						"synonyms":key_array,
+				}	
 				
 				if(Object.keys(option_output).length===5){break;}
 
 			}  
-		  
+			
+			conv.contexts.set(SelectContexts.parameter, 1);
 			conv.ask(response);
 			conv.ask('接下來，想要聽甚麼內容呢?');
 			conv.ask(new List({
@@ -339,6 +352,7 @@ app.intent('媒體狀態', (conv) => {
 	});
 });
 
+
 app.intent('最新一集', (conv) => {
 		   return new Promise(
 			   function(resolve){database.ref('/reporter_podcast').on('value',e=>{resolve(e.val())});
@@ -349,13 +363,13 @@ app.intent('最新一集', (conv) => {
 			final_data=final_data[0];
 			
 			conv.ask(new SimpleResponse({
-						speech: `<speak><p><s>沒問題，這是目前最新的集數</s><s>準備收聽${final_data.title}</s></p></speak>`,
+						speech: `<speak><p><s>沒問題，這是目前最新的集數</s><s>準備收聽${final_data.title.replace(/[＃]+\W+[ ]/gm,"")}</s></p></speak>`,
 						text:"好的，這是我找到的最新集數"
 					}));
 			 conv.ask(new MediaObject({
 				name: final_data.title,
 				url: final_data.url.replace('?aid=rss_feed',''),
-				description: final_data.description,
+				description: final_data.tags,
 				image: new Image({
 				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 				   alt: 'Album cover of an ocean view',
@@ -377,6 +391,7 @@ app.intent('最新一集', (conv) => {
 			text: "發生一點小狀況"}));
 	});
 });
+
 
 app.intent('結束對話', (conv) => {
 	
