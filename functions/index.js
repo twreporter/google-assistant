@@ -270,16 +270,15 @@ function fetch() {
 
 			console.log(final_data)
 			suggest_array=final_data.keys;
-			final_data=final_data[option];
 			
 			conv.ask(new SimpleResponse({
 						speech: `<speak><p><s>好的</s><s>準備收聽<break time="0.5s"/>${final_data.title.replace(/[＃]+\W+[ ]/gm,"")}</s></p></speak>`,
 						text:"好的，開始收聽吧"
 					}));
 			 conv.ask(new MediaObject({
-				name: final_data.title,
-				url: final_data.url.replace('?aid=rss_feed',''),
-				description: "發布於"+final_data[num].pubDate,
+				name: final_data[option].title,
+				url: final_data[option].url.replace('?aid=rss_feed',''),
+				description: "發布於"+final_data[option].pubDate,
 				image: new Image({
 				   url: 'https://storage.googleapis.com/gold-bruin-237907.appspot.com/1596622734919-f99336b6-4806-465c-bd21-874b1e502f6b.jpeg',
 				   alt: 'Album cover of an ocean view',
