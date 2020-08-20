@@ -35,6 +35,8 @@ var j=0;
 var flag=false;
 var key_array=[];
 var suggest_array=["香港","國安法","報導者","新聞","調查報導", "立場新聞","何桂藍","反送中","笑氣","陳潔","楊智強","青少年","暑假","毒品","李雪莉","運毒","死囚"];
+var keywords_list=[];
+
 
 function selectDay(datestring) {
 	var weekdays = ["日","一","二","三","四","五","六"];
@@ -197,13 +199,21 @@ function fetch() {
 		console.log(Object.keys(option_output).length)
 		console.log(option_output)
 		
+		keywords_list=[];
+		for(i=0;i<suggest_array.length;i++)
+		{
+			if(any.indexOf(suggest_array[i])!==-1&&suggest_array[i].length!==0){keywords_list.push(suggest_array[i])}
+		}
+		
+		keywords_list=String(keywords_list).replace(",","、")
+		
 		if(Object.keys(option_output).length>=2){
 			conv.ask(new SimpleResponse({
 						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽吧!</s></p></speak>`,
 						text:"下面是我找到的對應集數"
 					}));
 			conv.ask(new List({
-				title: '關鍵字包含「'+any+'」的集數',
+				title: '關鍵字包含「'+keywords_list+'」的集數',
 				items: option_output,
 				}));	
 			conv.ask(new Suggestions('播放最新的集數' ));
@@ -215,7 +225,7 @@ function fetch() {
 			if(conv.screen){
 			conv.ask(new SimpleResponse({
 						speech: `<speak><p><s>接下來，是我找到的唯一集數，標題是<break time="0.5s"/>${final_data[num].title.replace(/[＃]+\W+[ ]/gm,"")}</s><break time="0.5s"/></p></speak>`,
-						text:"只找到一個對應的集數，開始收聽吧"}));
+						text:"關鍵字包含「"+keywords_list+"」的集數只有一個，\n開始收聽吧"}));
 			}
 			else{
 			conv.expectUserResponse = false;	
