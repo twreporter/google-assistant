@@ -36,8 +36,6 @@ var flag=false;
 var key_array=[];
 var suggest_array=["香港","國安法","報導者","新聞","調查報導", "立場新聞","何桂藍","反送中","笑氣","陳潔","楊智強","青少年","暑假","毒品","李雪莉","運毒","死囚"];
 
-const SelectContexts = {parameter: 'option',}
-
 function selectDay(datestring) {
 	var weekdays = ["日","一","二","三","四","五","六"];
 	
@@ -124,7 +122,7 @@ function fetch() {
 		if(conv.screen){		
 		conv.ask(new BasicCard({ 
 				title:"【SoundOn 原創】",
-				subtitle:"由台灣獨立媒體《報導者》所製播。以調查報導為主的記者們，把走進的現場、發現的故事、採訪的幕後、遇見的人物，透過訪談、對話、第一人稱敘事帶給你。希望以聲音的形式，陪伴你關心世界、走入在地、聽見多元社會脈動。\n節目包括三個單元：\n＃去現場\n＃記者給你當\n＃你為什麼要",
+				subtitle:"由台灣獨立媒體《報導者》所製播。\n以調查報導為主的記者們，把走進的現場、發現的故事、採訪的幕後、遇見的人物，透過訪談、對話、第一人稱敘事帶給你。希望以聲音的形式，陪伴你關心世界、走入在地、聽見多元社會脈動。\n節目包括三個單元：\n＃去現場\n＃記者給你當\n＃你為什麼要",
 				text:"歡迎緊追《報導者》臉書粉絲團、Instagram、電子報，許願節目來賓、參與提問，告訴我們你想聽什麼。",
 				buttons: new Button({ title: '贊助力挺', url: "https://support.twreporter.org/?utm_source=podcast&utm_medium=podcast&utm_campaign=intro", display: 'CROPPED', }),
 		}));
@@ -200,7 +198,6 @@ function fetch() {
 		console.log(option_output)
 		
 		if(Object.keys(option_output).length>=2){
-			conv.contexts.set(SelectContexts.parameter, 1);
 			conv.ask(new SimpleResponse({
 						speech: `<speak><p><s>下面是我找到的對應集數</s><s>請點擊來收聽吧!</s></p></speak>`,
 						text:"下面是我找到的對應集數"
@@ -329,7 +326,6 @@ app.intent('媒體狀態', (conv) => {
 
 			}  
 			
-			conv.contexts.set(SelectContexts.parameter, 1);
 			conv.ask(response);
 			conv.ask('接下來，想要聽甚麼內容呢?');
 			conv.ask(new List({
